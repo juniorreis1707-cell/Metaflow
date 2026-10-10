@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>MetaFlow</title>
+    <meta name="description" content="Organize suas metas, subtarefas e prazos em um só lugar.">
+    <meta name="theme-color" content="#3150ff">
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="auth.css">
+    <link rel="stylesheet" href="extras.css">
+    <script src="auth.js"></script>
+    <script>
+        // Sem sessão, volta para a tela de login antes de mostrar qualquer meta.
+        if (!MetaAuth.requireLogin()) { document.documentElement.style.visibility = 'hidden'; }
+    </script>
+    <script>
+        // Aplica o tema antes de pintar a página, para não piscar.
+        (function () {
+            try {
+                var theme = localStorage.getItem('metaflow_theme');
+                if (!theme) {
+                    theme = localStorage.getItem('metaflow_darkmode') === 'true' ||
+                        window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                }
+                document.documentElement.dataset.theme = theme;
+            } catch (e) {
+                document.documentElement.dataset.theme = 'light';
+            }
+        })();
+    </script>
+</head>
+<body>
+    <a class="skip-link" href="#main">Pular para as metas</a>
+
+    <div class="app">
+        <!-- Barra lateral: navegação, filtros e dados -->
+        <aside class="rail" aria-label="Navegação">
+            <div class="brand">
+                <img class="brand-mark" src="icons/logo.svg" alt="" width="34" height="34">
+                <span class="brand-name">MetaFlow</span>
+            </div>
+
+            <button type="button" class="btn btn-dark btn-block" data-action="new">
+                <span data-icon="plus"></span>
+                Nova meta
+                <kbd class="kbd" aria-hidden="true">N</kbd>
+            </button>
+
+            <nav class="nav" aria-label="Filtrar metas" id="statusNav">
+                <button type="button" class="nav-item is-active" data-action="filter" data-filter="all">
+                    <span class="nav-label"><span data-icon="list"></span>Todas</span><span class="count" data-count="all">0</span>
+                </button>
+                <button type="button" class="nav-item" data-action="filter" data-filter="pending">
+                    <span class="nav-label"><span data-icon="circle"></span>Pendentes</span><span class="count" data-count="pending">0</span>
+                </button>
+                <button type="button" class="nav-item" data-action="filter" data-filter="progress">
+                    <span class="nav-label"><span data-icon="half"></span>Em progresso</span><span class="count" data-count="progress">0</span>
+                </button>
+                <button type="button" class="nav-item" data-action="filter" data-filter="completed">
+                    <span class="nav-label"><span data-icon="checkcircle"></span>Concluídas</span><span class="count" data-count="completed">0</span>
+                </button>
+                <button type="button" class="nav-item nav-item-alert" data-action="filter" data-filter="overdue">
+                    <span class="nav-label"><span data-icon="clock"></span>Atrasadas</span><span class="count" data-count="overdue">0</span>
+                </button>
+                <button type="button" class="nav-item" data-action="filter" data-filter="high">
+                    <span class="nav-label"><span data-icon="flag"></span>Alta prioridade</span><span class="count" data-count="high">0</span>
+                </button>
+            </nav>
+
+            <div class="rail-block" id="categoryBlock" hidden>
+                <h2 class="rail-title">Categorias</h2>
+                <nav class="nav" id="categoryList" aria-label="Filtrar por categoria"></nav>
+            </div>
+
+            <div class="rail-block">
+                <h2 class="rail-title">Ferramentas</h2>
+                <nav class="nav" aria-label="Ferramentas">
+                    <button type="button" class="nav-item" data-action="tool" data-tool="focus"><span class="nav-label"><span data-icon="timer"></span>Modo foco</span></button>
+                    <button type="button" class="nav-item" data-action="tool" data-tool="habits"><span class="nav-label"><span data-icon="repeat"></span>Hábitos</span></button>
+                    <button type="button" class="nav-item" data-action="tool" data-tool="stats"><span class="nav-label"><span data-icon="chart"></span>Estatísticas</span></button>
+                    <button type="button" class="nav-item" data-action="tool" data-tool="achievements"><span class="nav-label"><span data-icon="trophy"></span>Conquistas</span></button>
+                    <button type="button" class="nav-item" data-action="tool" data-tool="review"><span class="nav-label"><span data-icon="review"></span>Revisão da semana</span></button>
+                    <button type="button" class="nav-item" data-action="tool" data-tool="settings"><span class="nav-label"><span data-icon="bell"></span>Lembretes e IA</span></button>
+                </nav>
+            </div>
+
+            <div class="rail-foot">
+                <div class="user-chip">
+                    <strong id="userName"></strong>
+                    <span id="userEmail"></span>
+                    <em class="level-pill" id="userLevel" hidden></em>
+                </div>
+                <button type="button" class="rail-btn" data-action="theme" id="themeBtn" aria-label="Alternar entre tema claro e escuro">
+                    <span data-icon="moon" id="themeIcon"></span>
+                    <span id="themeLabel">Tema escuro</span>
+                </button>
+                <button type="button" class="rail-btn" data-action="export">
+                    <span data-icon="download"></span>
+                    Salvar backup
+                </button>
+                <button type="button" class="rail-btn" data-action="import">
+                    <span data-icon="upload"></span>
+                    Restaurar backup
+                </button>
+                <button type="button" class="rail-btn" data-action="logout">
+                    <span data-icon="logout"></span>
+                    Sair
+                </button>
+                <button type="button" class="rail-btn" id="installBtn" data-tools="install" hidden>
+                    <span data-icon="download"></span>
+                    Instalar app
+                </button>
+                <input type="file" id="importInput" accept="application/json,.json" hidden>
+            </div>
+        </aside>
+
+        <main class="main" id="main">
+            <!-- Resumo: o que importa agora + progresso + ritmo da semana -->
+            <header class="hero">
+                <div class="hero-text">
+                    <p class="hero-date" id="heroDate"></p>
+                    <h1 class="hero-title" id="heroTitle">Carregando suas metas</h1>
+                    <p class="hero-sub" id="heroSub"></p>
+                </div>
+
+                <div class="hero-viz">
+                    <div class="ring" role="img" id="ring" aria-label="Progresso geral">
+                        <svg viewBox="0 0 120 120" aria-hidden="true">
+                            <circle class="ring-track" cx="60" cy="60" r="50"></circle>
+                            <circle class="ring-fill" id="ringFill" cx="60" cy="60" r="50"></circle>
+                        </svg>
+                        <div class="ring-label">
+                            <strong id="ringValue">0%</strong>
+                            <span>geral</span>
+                        </div>
+                    </div>
+                    <div class="flow">
+                        <div id="flowChart" class="flow-chart"></div>
+                        <p class="flow-caption" id="streakText"></p>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Metas fixadas para hoje -->
+            <section class="focus" aria-labelledby="focusTitle">
+                <div class="section-head">
+                    <h2 id="focusTitle">Foco do dia</h2>
+                    <p>Fixe até 3 metas com a estrela para mantê-las aqui.</p>
+                </div>
+                <div class="focus-list" id="focusList"></div>
+            </section>
+
+            <!-- Busca, ordem e modo de exibição -->
+            <section class="toolbar" aria-label="Buscar e organizar">
+                <label class="search">
+                    <span data-icon="search"></span>
+                    <span class="sr-only">Buscar metas</span>
+                    <input type="search" id="searchInput" placeholder="Buscar por título, categoria ou subtarefa" autocomplete="off">
+                    <kbd class="kbd" aria-hidden="true">/</kbd>
+                </label>
+
+                <label class="select-wrap">
+                    <span class="sr-only">Ordenar por</span>
+                    <select id="sortSelect">
+                        <option value="deadline">Ordenar por prazo</option>
+                        <option value="priority">Ordenar por prioridade</option>
+                        <option value="recent">Ordenar por mais recentes</option>
+                    </select>
+                </label>
+
+                <div class="segmented" role="group" aria-label="Modo de exibição">
+                    <button type="button" class="seg-btn is-active" data-action="view" data-view="list" aria-pressed="true">
+                        <span data-icon="list"></span>Lista
+                    </button>
+                    <button type="button" class="seg-btn" data-action="view" data-view="board" aria-pressed="false">
+                        <span data-icon="board"></span>Quadro
+                    </button>
+                    <button type="button" class="seg-btn" data-action="view" data-view="calendar" aria-pressed="false">
+                        <span data-icon="calendar"></span>Calendário
+                    </button>
+                </div>
+            </section>
+
+            <!-- Metas -->
+            <section class="goals" aria-label="Metas">
+                <div class="goals-list" id="goalsContainer"></div>
+
+                <div class="board" id="boardContainer" hidden>
+                    <div class="board-col" data-status="pending">
+                        <h3 class="board-head">Pendentes <span class="count" id="boardCountPending">0</span></h3>
+                        <div class="board-drop" id="boardPending"></div>
+                    </div>
+                    <div class="board-col" data-status="progress">
+                        <h3 class="board-head">Em progresso <span class="count" id="boardCountProgress">0</span></h3>
+                        <div class="board-drop" id="boardProgress"></div>
+                    </div>
+                    <div class="board-col" data-status="completed">
+                        <h3 class="board-head">Concluídas <span class="count" id="boardCountCompleted">0</span></h3>
+                        <div class="board-drop" id="boardCompleted"></div>
+                    </div>
+                </div>
+
+                <div class="calendar" id="calendarContainer" hidden></div>
+
+                <div class="empty" id="emptyState" hidden></div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Cadastro e edição de meta -->
+    <dialog class="dialog" id="goalDialog" aria-labelledby="dialogTitle">
+        <form id="goalForm" novalidate>
+            <div class="dialog-head">
+                <h2 id="dialogTitle">Nova meta</h2>
+                <button type="button" class="icon-btn" data-action="close-dialog" aria-label="Fechar">
+                    <span data-icon="x"></span>
+                </button>
+            </div>
+
+            <div class="dialog-body">
+                <div class="field">
+                    <label for="goalTitle">Título</label>
+                    <input type="text" id="goalTitle" maxlength="120" required placeholder="Ex.: Terminar o curso de Java" autocomplete="off">
+                    <p class="field-error" id="titleError" hidden>Dê um título para a meta.</p>
+                </div>
+
+                <div class="field">
+                    <label for="goalDescription">Descrição <span class="optional">(opcional)</span></label>
+                    <textarea id="goalDescription" rows="3" maxlength="500" placeholder="O que significa concluir esta meta?"></textarea>
+                </div>
+
+                <div class="field-row">
+                    <div class="field">
+                        <label for="goalDeadline">Prazo</label>
+                        <input type="date" id="goalDeadline" required>
+                        <p class="field-error" id="deadlineError" hidden></p>
+                    </div>
+                    <div class="field">
+                        <label for="goalCategory">Categoria</label>
+                        <input type="text" id="goalCategory" list="categoryOptions" maxlength="30" placeholder="Geral" autocomplete="off">
+                        <datalist id="categoryOptions"></datalist>
+                    </div>
+                </div>
+
+                <div class="field-row">
+                    <fieldset class="field">
+                        <legend>Prioridade</legend>
+                        <div class="pills">
+                            <label class="pill"><input type="radio" name="priority" value="low"><span>Baixa</span></label>
+                            <label class="pill"><input type="radio" name="priority" value="medium" checked><span>Média</span></label>
+                            <label class="pill"><input type="radio" name="priority" value="high"><span>Alta</span></label>
+                        </div>
+                    </fieldset>
+                    <div class="field">
+                        <label for="goalStatus">Situação</label>
+                        <select id="goalStatus">
+                            <option value="pending">Pendente</option>
+                            <option value="progress">Em progresso</option>
+                            <option value="completed">Concluída</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="field-row">
+                    <div class="field">
+                        <label for="goalRecurrence">Repetição</label>
+                        <select id="goalRecurrence">
+                            <option value="">Não repete</option>
+                            <option value="daily">Todo dia</option>
+                            <option value="weekly">Toda semana</option>
+                            <option value="monthly">Todo mês</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="goalParent">Dentro de</label>
+                        <select id="goalParent"></select>
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label for="goalTags">Etiquetas <span class="optional">(separe por vírgula)</span></label>
+                    <input type="text" id="goalTags" maxlength="120" placeholder="estudo, urgente, casa" autocomplete="off">
+                </div>
+
+                <div class="field">
+                    <div class="field-head">
+                        <span class="label">Subtarefas</span>
+                        <span class="field-actions">
+                            <button type="button" class="btn btn-ghost btn-sm" data-tools="ai-suggest" id="aiBtn">Sugerir com IA</button>
+                            <button type="button" class="btn btn-ghost btn-sm" data-action="add-subtask-row">
+                                <span data-icon="plus"></span>Adicionar
+                            </button>
+                        </span>
+                    </div>
+                    <div class="subtask-rows" id="subtaskRows"></div>
+                </div>
+
+                <div class="field">
+                    <label for="goalNotes">Notas <span class="optional">(opcional)</span></label>
+                    <textarea id="goalNotes" rows="3" maxlength="2000" placeholder="Ideias, contexto, o que não esquecer"></textarea>
+                </div>
+
+                <div class="field">
+                    <label for="goalLinks">Links <span class="optional">(um por linha)</span></label>
+                    <textarea id="goalLinks" rows="2" maxlength="1500" placeholder="https://..."></textarea>
+                </div>
+            </div>
+
+            <div class="dialog-foot">
+                <button type="button" class="btn btn-ghost" data-action="close-dialog">Cancelar</button>
+                <button type="submit" class="btn btn-primary" id="saveBtn">Salvar meta</button>
+            </div>
+        </form>
+    </dialog>
+
+    <!-- Ferramentas: foco, hábitos, estatísticas, conquistas, revisão e ajustes -->
+    <dialog class="dialog tools-dialog" id="toolsDialog" aria-labelledby="toolsTitle">
+        <div class="dialog-head">
+            <h2 id="toolsTitle">Ferramentas</h2>
+            <button type="button" class="icon-btn" data-tools="close" aria-label="Fechar">
+                <span data-icon="x"></span>
+            </button>
+        </div>
+        <div class="tools-tabs" role="tablist" aria-label="Ferramentas" id="toolsTabs"></div>
+        <div class="tools-body" id="toolsBody"></div>
+    </dialog>
+
+    <div class="focus-chip" id="focusChip" hidden>
+        <button type="button" data-tools="chip" aria-label="Abrir modo foco">
+            <span class="focus-chip-time" id="focusChipTime">25:00</span>
+            <span class="focus-chip-label" id="focusChipLabel">Foco</span>
+        </button>
+    </div>
+
+    <div class="toasts" id="toasts" popover="manual" role="status" aria-live="polite"></div>
+    <canvas class="confetti" id="confetti" aria-hidden="true"></canvas>
+
+    <script src="script.js"></script>
+    <script src="extras.js"></script>
+    <script>
+        if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+            navigator.serviceWorker.register('sw.js').catch(function () { /* sem offline */ });
+        }
+    </script>
+</body>
+</html>

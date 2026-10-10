@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Entrar no MetaFlow</title>
+    <meta name="theme-color" content="#0e1a2e">
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="auth.css">
+    <script>
+        (function () {
+            try {
+                var theme = localStorage.getItem('metaflow_theme');
+                if (!theme) { theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'; }
+                document.documentElement.dataset.theme = theme;
+            } catch (e) { document.documentElement.dataset.theme = 'light'; }
+        })();
+    </script>
+</head>
+<body class="auth-body">
+    <main class="auth">
+        <section class="auth-side" aria-hidden="true">
+            <div class="brand">
+                <img class="brand-mark" src="icons/logo.svg" alt="" width="34" height="34">
+                <span class="brand-name">MetaFlow</span>
+            </div>
+            <p class="auth-pitch">Suas metas, seus prazos e cada passo até concluir.</p>
+            <svg class="auth-art" viewBox="0 0 64 64" aria-hidden="true">
+                <path d="M15 47V26C15 16.5 25 14.5 29.5 23L32 28.5L34.5 23C39 14.5 49 16.5 49 26V42" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="49" cy="47.5" r="5.4" fill="currentColor"/>
+            </svg>
+        </section>
+
+        <section class="auth-panel">
+            <div class="auth-card">
+                <h1 id="authTitle">Entrar</h1>
+                <p class="auth-sub" id="authSub">Use seu e-mail e senha para abrir suas metas.</p>
+
+                <div class="segmented auth-tabs" role="tablist" aria-label="Acesso">
+                    <button type="button" class="seg-btn is-active" role="tab" id="tabLogin" data-mode="login" aria-selected="true">Entrar</button>
+                    <button type="button" class="seg-btn" role="tab" id="tabRegister" data-mode="register" aria-selected="false">Criar conta</button>
+                </div>
+
+                <form id="authForm" novalidate>
+                    <div class="field" id="nameField" hidden>
+                        <label for="authName">Nome</label>
+                        <input type="text" id="authName" autocomplete="name" maxlength="60" placeholder="Como devemos te chamar?">
+                    </div>
+
+                    <div class="field">
+                        <label for="authEmail">E-mail</label>
+                        <input type="text" id="authEmail" inputmode="email" autocomplete="email" maxlength="120" placeholder="voce@exemplo.com">
+                    </div>
+
+                    <div class="field">
+                        <label for="authPassword">Senha</label>
+                        <div class="password-wrap">
+                            <input type="password" id="authPassword" autocomplete="current-password" maxlength="100" placeholder="Pelo menos 6 caracteres">
+                            <button type="button" class="btn btn-ghost btn-sm" id="togglePassword" aria-pressed="false">Mostrar</button>
+                        </div>
+                    </div>
+
+                    <label class="check auth-remember">
+                        <input type="checkbox" id="authRemember" checked>
+                        <span class="check-box"></span>
+                        <span class="check-text">Manter conectado neste computador</span>
+                    </label>
+
+                    <p class="field-error auth-error" id="authError" role="alert" hidden></p>
+
+                    <button type="submit" class="btn btn-primary btn-block" id="authSubmit">Entrar</button>
+                </form>
+
+                <p class="auth-note">As contas ficam salvas somente neste navegador. Não há recuperação de senha, então faça um backup das suas metas de vez em quando.</p>
+            </div>
+        </section>
+    </main>
+
+    <script src="auth.js"></script>
+    <script>
+        if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
+            navigator.serviceWorker.register('sw.js').catch(function () { /* sem offline */ });
+        }
+    </script>
+    <script>
+        (function () {
+            if (MetaAuth.current()) { location.replace('index.html'); return; }
+
+            var mode = MetaAuth.hasAccounts() ? 'login' : 'register';
+            var $ = function (id) { return document.getElementById(id); };
+
+            function setMode(next) {
+                mode = next;
+                var register = mode === 'register';
+                $('authTitle').textContent = register ? 'Criar conta' : 'Entrar';
+                $('authSub').textContent = register
+                    ? 'Leva menos de um minuto. Suas metas atuais ficam na conta nova.'
+                    : 'Use seu e-mail e senha para abrir suas metas.';
+                $('authSubmit').textContent = register ? 'Criar conta' : 'Entrar';
+                $('nameField').hidden = !register;
+                $('authPassword').setAttribute('autocomplete', register ? 'new-password' : 'current-password');
+                ['login', 'register'].forEach(function (m) {
+                    var tab = $(m === 'login' ? 'tabLogin' : 'tabRegister');
+                    tab.classList.toggle('is-active', m === mode);
+                    tab.setAttribute('aria-selected', String(m === mode));
+                });
+                showError('');
+                (register ? $('authName') : $('authEmail')).focus();
+            }
+
+            function showError(message) {
+                $('authError').textContent = message;
+                $('authError').hidden = !message;
+            }
+
+            $('tabLogin').addEventListener('click', function () { setMode('login'); });
+            $('tabRegister').addEventListener('click', function () { setMode('register'); });
+
+            $('togglePassword').addEventListener('click', function () {
+                var input = $('authPassword');
+                var show = input.type === 'password';
+                input.type = show ? 'text' : 'password';
+                this.textContent = show ? 'Ocultar' : 'Mostrar';
+                this.setAttribute('aria-pressed', String(show));
+            });
+
+            $('authForm').addEventListener('submit', function (event) {
+                event.preventDefault();
+                showError('');
+                var button = $('authSubmit');
+                var label = button.textContent;
+                button.disabled = true;
+                button.textContent = 'Aguarde...';
+
+                var email = $('authEmail').value;
+                var password = $('authPassword').value;
+                var remember = $('authRemember').checked;
+                var action = mode === 'register'
+                    ? MetaAuth.register($('authName').value, email, password, remember)
+                    : MetaAuth.login(email, password, remember);
+
+                action.then(function () {
+                    location.replace('index.html');
+                }).catch(function (err) {
+                    showError(err && err.message ? err.message : 'Não foi possível entrar. Tente de novo.');
+                    button.disabled = false;
+                    button.textContent = label;
+                });
+            });
+
+            setMode(mode);
+        })();
+    </script>
+</body>
+</html>

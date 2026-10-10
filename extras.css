@@ -1,0 +1,707 @@
+/* MetaFlow — estilos das ferramentas extras (calendário, foco, hábitos, etc.) */
+
+/* Avisos na camada superior (ficam acima de janelas abertas) */
+.toasts[popover] {
+    inset: auto 20px 20px auto;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    overflow: visible;
+    width: auto;
+    height: auto;
+    max-width: none;
+    color: inherit;
+}
+
+
+.field-actions {
+    display: inline-flex;
+    gap: 8px;
+}
+.field-head {
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.level-pill {
+    margin-top: 4px;
+    width: fit-content;
+    padding: 1px 8px;
+    border-radius: 6px;
+    background: var(--brand-soft);
+    color: var(--brand);
+    font-style: normal;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+/* ---------- Cartão: pai, etiquetas, notas e links ---------- */
+
+.card-parent {
+    margin-bottom: -4px;
+    font-size: 0.82rem;
+    color: var(--ink-3);
+}
+.card-parent strong {
+    color: var(--ink-2);
+    font-weight: 600;
+}
+
+.tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.tag {
+    padding: 1px 9px;
+    border: 1px solid var(--line);
+    border-radius: 99px;
+    background: transparent;
+    color: var(--ink-2);
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+.tag:hover {
+    border-color: var(--brand);
+    color: var(--brand);
+}
+
+.notes-box {
+    border-top: 1px solid var(--line);
+    padding-top: 10px;
+}
+.notes-box summary {
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--ink-2);
+    user-select: none;
+}
+.notes-text {
+    margin-top: 8px;
+    white-space: pre-wrap;
+    color: var(--ink-2);
+    font-size: 0.92rem;
+    overflow-wrap: anywhere;
+}
+.links {
+    list-style: none;
+    margin: 8px 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.9rem;
+}
+.links a {
+    color: var(--brand);
+    overflow-wrap: anywhere;
+}
+
+/* ---------- Calendário ---------- */
+
+.calendar {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+.cal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+.cal-title {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 650;
+    letter-spacing: -0.02em;
+    text-transform: capitalize;
+}
+.cal-nav {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 1px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--line);
+    overflow: hidden;
+}
+.cal-wd {
+    padding: 8px 6px;
+    background: var(--surface-2);
+    color: var(--ink-3);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-align: center;
+    text-transform: capitalize;
+}
+.cal-day {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-height: 104px;
+    padding: 6px;
+    background: var(--surface);
+    cursor: pointer;
+    min-width: 0;
+}
+.cal-day:hover {
+    background: color-mix(in srgb, var(--brand-soft) 45%, var(--surface));
+}
+.cal-day.is-other {
+    background: var(--surface-2);
+}
+.cal-day.is-other .cal-num {
+    color: var(--ink-3);
+}
+.cal-daytop {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.cal-num {
+    display: inline-grid;
+    place-items: center;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 4px;
+    border-radius: 99px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+.cal-day.is-today .cal-num {
+    background: var(--brand);
+    color: var(--brand-ink);
+}
+.cal-add {
+    display: inline-grid;
+    place-items: center;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--ink-3);
+    opacity: 0;
+}
+.cal-day:hover .cal-add,
+.cal-add:focus-visible {
+    opacity: 1;
+}
+.cal-add:hover {
+    background: var(--surface-2);
+    color: var(--ink);
+}
+.cal-chip {
+    display: block;
+    width: 100%;
+    padding: 2px 6px 2px 8px;
+    border: 0;
+    border-left: 3px solid var(--prio-medium);
+    border-radius: 4px;
+    background: var(--brand-soft);
+    color: var(--ink);
+    font-size: 0.78rem;
+    font-weight: 500;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.cal-chip.prio-high { border-left-color: var(--prio-high); }
+.cal-chip.prio-low { border-left-color: var(--prio-low); }
+.cal-chip.st-completed {
+    background: var(--done-soft);
+    color: var(--ink-3);
+    text-decoration: line-through;
+}
+.cal-more {
+    padding-left: 4px;
+    font-size: 0.75rem;
+    color: var(--ink-3);
+}
+
+/* ---------- Janela de ferramentas ---------- */
+
+.tools-dialog {
+    width: min(720px, calc(100vw - 24px));
+    max-height: calc(100vh - 24px);
+    overflow: hidden;
+}
+.tools-dialog[open] {
+    display: flex;
+    flex-direction: column;
+}
+.tools-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 10px 18px 0;
+    border-bottom: 1px solid var(--line);
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+.tools-tab {
+    flex: none;
+    padding: 9px 14px;
+    border: 0;
+    border-bottom: 3px solid transparent;
+    background: transparent;
+    color: var(--ink-2);
+    font-weight: 600;
+}
+.tools-tab:hover {
+    color: var(--ink);
+}
+.tools-tab.is-active {
+    border-bottom-color: var(--brand);
+    color: var(--brand);
+}
+.tools-body {
+    padding: 20px 24px 26px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+.tools-h {
+    margin-top: 10px;
+    font-family: var(--font-display);
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+.tools-h.first {
+    margin-top: 0;
+}
+.tools-note {
+    color: var(--ink-2);
+    font-size: 0.92rem;
+}
+.tools-empty {
+    padding: 18px;
+    border: 1.5px dashed var(--line);
+    border-radius: var(--radius);
+    color: var(--ink-3);
+}
+.tools-empty.small {
+    padding: 10px 14px;
+    font-size: 0.9rem;
+}
+.tools-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.tools-body .field input[type="password"],
+.tools-body .field input[type="text"],
+.tools-body .field select,
+.tools-body .field textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+}
+.tools-body .field input:focus,
+.tools-body .field select:focus,
+.tools-body .field textarea:focus {
+    outline: 0;
+    border-color: var(--brand);
+}
+
+.plain-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+.plain-list li {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 0.94rem;
+}
+.plain-list li span:first-child {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+.plain-list li span:last-child {
+    flex: none;
+    color: var(--ink-3);
+}
+.plain-list li .due {
+    color: inherit;
+}
+.plain-list li .due.is-late {
+    color: var(--late);
+}
+
+/* Foco */
+.timer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+.timer-modes {
+    display: inline-flex;
+    padding: 3px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+}
+.timer-face {
+    position: relative;
+    width: 220px;
+    height: 220px;
+}
+.timer-face svg {
+    width: 100%;
+    height: 100%;
+}
+.timer-face .ring-track {
+    stroke: var(--surface-2);
+}
+.timer-ring {
+    stroke: var(--brand);
+    transition: stroke-dashoffset 0.5s linear;
+}
+.timer-clock {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-family: var(--font-display);
+    font-size: 3.1rem;
+    font-weight: 650;
+    letter-spacing: -0.025em;
+    font-variant-numeric: tabular-nums;
+}
+.timer-actions {
+    display: flex;
+    gap: 10px;
+}
+.timer-config {
+    width: 100%;
+}
+.timer .tools-note,
+.timer .tools-h,
+.timer .plain-list {
+    align-self: stretch;
+}
+
+.focus-chip {
+    position: fixed;
+    left: 20px;
+    bottom: 20px;
+    z-index: 150;
+}
+.focus-chip button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    border: 0;
+    border-radius: 99px;
+    background: var(--inverse);
+    color: var(--inverse-ink);
+    box-shadow: var(--shadow-lift);
+}
+.focus-chip-time {
+    font-weight: 650;
+    font-size: 1.05rem;
+    font-variant-numeric: tabular-nums;
+}
+.focus-chip-label {
+    font-size: 0.85rem;
+    color: var(--inverse-ink-2);
+}
+
+/* Hábitos */
+.habit-add {
+    display: flex;
+    gap: 10px;
+}
+.habit-add input {
+    flex: 1;
+    min-width: 0;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+}
+.habit-add input:focus {
+    outline: 0;
+    border-color: var(--brand);
+}
+.habit-grid {
+    display: flex;
+    flex-direction: column;
+}
+.habit-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto 32px;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+}
+.habit-headrow {
+    padding: 0 0 4px;
+    border-bottom: 0;
+}
+.habit-name {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+.habit-name strong {
+    overflow-wrap: anywhere;
+}
+.habit-name small {
+    color: var(--ink-3);
+}
+.habit-days {
+    display: flex;
+    gap: 8px;
+}
+.habit-wd {
+    width: 28px;
+    text-align: center;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--ink-3);
+}
+.habit-wd.is-today {
+    color: var(--brand);
+}
+.habit-dot {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 2px solid var(--line);
+    border-radius: 50%;
+    background: transparent;
+    transition: background 0.12s, border-color 0.12s;
+}
+.habit-dot:hover {
+    border-color: var(--brand);
+}
+.habit-dot.is-on {
+    border-color: var(--done);
+    background: var(--done);
+}
+
+/* Estatísticas */
+.stat-tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+}
+.stat-tile {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 12px 14px;
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+}
+.stat-tile strong {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 650;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+}
+.stat-tile span {
+    font-size: 0.82rem;
+    color: var(--ink-2);
+}
+.bars {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+.bar-row {
+    display: grid;
+    grid-template-columns: minmax(90px, 150px) minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.9rem;
+}
+.bar-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--ink-2);
+}
+.bar-track {
+    height: 10px;
+    border-radius: 99px;
+    background: var(--surface-2);
+    overflow: hidden;
+}
+.bar-track span {
+    display: block;
+    height: 100%;
+    border-radius: 99px;
+    background: var(--brand);
+}
+.bar-val {
+    min-width: 48px;
+    text-align: right;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Conquistas */
+.level-card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px 18px;
+    border-radius: var(--radius);
+    background: var(--inverse);
+    color: var(--inverse-ink);
+}
+.level-card > div:first-child {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.level-num {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-weight: 650;
+    letter-spacing: -0.02em;
+    color: var(--inverse-ink);
+}
+.level-xp,
+.level-card .tools-note {
+    color: var(--inverse-ink-2);
+    font-size: 0.88rem;
+}
+.level-card .meter {
+    background: rgba(255, 255, 255, 0.12);
+}
+.level-card .meter span {
+    background: var(--inverse-ink);
+}
+.badges {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 10px;
+}
+.badge {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    opacity: 0.62;
+}
+.badge.is-done {
+    opacity: 1;
+    border-color: color-mix(in srgb, var(--done) 45%, var(--line));
+    background: var(--done-soft);
+}
+.badge-mark {
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    flex: none;
+    border-radius: 50%;
+    background: var(--surface-2);
+    color: var(--ink-3);
+}
+.badge.is-done .badge-mark {
+    background: var(--done);
+    color: #fff;
+}
+.badge div {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+.badge small {
+    color: var(--ink-2);
+    font-size: 0.82rem;
+}
+.badge .badge-status {
+    margin-top: 2px;
+    font-weight: 600;
+    color: var(--ink-3);
+}
+.badge.is-done .badge-status {
+    color: var(--done);
+}
+
+@media (max-width: 700px) {
+    .cal-day {
+        min-height: 78px;
+        padding: 4px;
+    }
+    .cal-chip {
+        font-size: 0.7rem;
+        padding: 1px 4px 1px 5px;
+    }
+    .cal-add {
+        display: none;
+    }
+    .habit-row {
+        grid-template-columns: minmax(0, 1fr) 32px;
+    }
+    .habit-row .habit-days {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        justify-content: space-between;
+    }
+    .habit-headrow {
+        display: none;
+    }
+    .bar-row {
+        grid-template-columns: 84px minmax(0, 1fr) auto;
+        gap: 8px;
+    }
+    .tools-body {
+        padding: 16px;
+    }
+}
+
+/* Ajustes finos */
+.cal-title {
+    text-transform: none;
+    display: block;
+}
+.cal-title::first-letter {
+    text-transform: uppercase;
+}
+.auth-remember input:checked ~ .check-text {
+    text-decoration: none;
+    color: var(--ink);
+}
+@media (min-width: 901px) {
+    .focus-chip {
+        left: 292px;
+    }
+}
